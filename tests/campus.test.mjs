@@ -30,3 +30,25 @@ test("campus has five distinct selectable districts and valid finite geometry", 
   );
   console.log({ meshes, triangles });
 });
+import { batchStaticGeometry } from "../src/world/batching.js";
+test("GPU batching reduces draw objects without absorbing actors or district targets", () => {
+  const scene = new THREE.Scene();
+  const w = buildCampus(scene);
+  const result = batchStaticGeometry(scene, [
+    w.avatar,
+    w.heart,
+    ...w.rings,
+    ...w.flags,
+    ...w.hitboxes,
+  ]);
+  assert(result.removed - result.batches > 400);
+  assert.equal(w.avatar.parent, scene);
+  for (const hit of w.hitboxes) assert(hit.parent);
+  assert(w.limbs.every((l) => l.parent === w.avatar));
+  let count = 0;
+  scene.traverse((o) => {
+    if (o.isMesh) count++;
+  });
+  assert(count < 150);
+  console.log({ gpuMeshObjects: count, instancedBatches: result.batches });
+});

@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { districts } from "./demo";
 import { buildCampus } from "./world/architecture";
+import { batchStaticGeometry } from "./world/batching";
 const preference = (key, fallback) => {
   try {
     return localStorage.getItem(key) || fallback;
@@ -163,6 +164,14 @@ export default function World({
     fill.position.set(12, 16, -12);
     scene.add(fill);
     const world = buildCampus(scene, { software: isSoftware, quality });
+    if (!isSoftware)
+      batchStaticGeometry(scene, [
+        world.avatar,
+        world.heart,
+        ...world.rings,
+        ...world.flags,
+        ...world.hitboxes,
+      ]);
     const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 110);
     const home = new THREE.Vector3(22, 27, 31);
     camera.position.copy(home);
@@ -257,7 +266,7 @@ export default function World({
     renderer.domElement.addEventListener("webglcontextlost", contextLost);
     const resize = () => {
       camera.aspect = el.clientWidth / el.clientHeight;
-      camera.zoom = Math.min(1, camera.aspect / 1.32);
+      camera.zoom = Math.min(1, camera.aspect / 1.15);
       camera.updateProjectionMatrix();
       renderer.setSize(el.clientWidth, el.clientHeight);
       dirty = true;

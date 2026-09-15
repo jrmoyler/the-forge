@@ -2898,3 +2898,25 @@ footer button {
     transform: none;
   }
 }
+@media (max-width: 760px) {
+  .top-context {
+    font-size: 0;
+    gap: 0;
+    flex-shrink: 1;
+  }
+  .top-context:before {
+    font-size: 12px;
+  }
+  .topbar > div {
+    min-width: 0;
+  }
+  .top-actions {
+    flex-shrink: 0;
+  }
+  .top-actions .small-btn {
+    font-size: 11px;
+  }
+  .mobile-menu {
+    flex-shrink: 0;
+  }
+}

@@ -303,7 +303,14 @@ function App() {
   }
   return (
     <div className="app">
-      <a className="skip-link" href="#main-content">
+      <a
+        className="skip-link"
+        href="#main-content"
+        onClick={(e) => {
+          e.preventDefault();
+          document.getElementById("main-content")?.focus();
+        }}
+      >
         Skip to workspace
       </a>
       <aside className={menu ? "sidebar open" : "sidebar"}>
