@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env*
+!.env.example
+.vercel/
+qa/
+*Owner-Access*
+# Private training content lives in Supabase, not the public repository.
+curriculum.json
+supabase/quiz-keys.json
