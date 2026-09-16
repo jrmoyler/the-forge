@@ -1013,7 +1013,7 @@ function Auth({ close, token, toast }) {
         </h2>
         <p>
           {mode === "join"
-            ? "Join with your private, single-use invitation."
+            ? "Join with your private invitation. Already joined? Sign in with your existing account."
             : "Sign in to continue your work and see your circle."}
         </p>
         <div className="tabs">

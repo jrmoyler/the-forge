@@ -8,7 +8,7 @@ Supabase project: `sieeolvhcmqvumviqqjy` (The Collective AI, US East Ohio)
 
 ## Start here
 
-1. Open the private owner enrollment link in the separately delivered `Forge-Owner-Access.txt`. Create your own name, email, and password (12+ characters). The single-use owner invitation expires 30 days after creation.
+1. Open the private owner enrollment link in the separately delivered `Forge-Owner-Access.txt`. Create your own name, email, and password (12+ characters). After applying the reusable-owner migration below, this same owner invitation can be used repeatedly and does not expire. Each signup creates an owner account; keep this link private. If you already signed up, use **Sign in** with your existing email and password.
 2. Open **Your circle → Invite people**. Invite a mentor or learner. Invitations expire after seven days and can be used once. You share these links yourself; the app sends no messages.
 3. Assign a mission with a due date and guidance.
 4. Learners read the guide, practice, pass a server-scored knowledge check, and submit an artifact plus evidence.
@@ -58,7 +58,7 @@ Local development: `npm run dev`. If your container cannot enumerate network int
 - Full curriculum requires an authenticated member. Learners read only their own profile, progress, assignments, submissions, and quiz attempts. Mentors can inspect the circle's training records.
 - Learners cannot change their role, grade a review, see quiz answer keys, or award server mastery.
 - Quiz grading and mentor review use database functions with fixed search paths. Submission insertion requires a passed quiz; only one pending submission per member/mission is allowed.
-- Invitations are random bearer credentials, stored as SHA-256 hashes, one-use, and time-limited. Owner creation uses a separately delivered bootstrap token, never first-user-wins registration.
+- Invitations are random bearer credentials, stored as SHA-256 hashes. Ordinary mentor/learner invitations are single-use and time-limited; the separately issued owner invitation is reusable and non-expiring after the migration below. Owner creation uses a separately delivered bootstrap token, never first-user-wins registration.
 - Enrollment is authorized by the private invitation. The supplied email is an account identifier; this flow does not prove email ownership. Account recovery currently requires assistance from the project administrator through Supabase. The app does not provide password reset or account suspension controls.
 - The code sandbox has an opaque origin, no same-origin privileges, and a CSP blocking network, forms, images other than data URLs, and external scripts. It is a client-side experiment pad, not a container or arbitrary server-code runtime. Infinite loops can still stall a browser tab.
 - Review values determine mastery; rewards are recognition badges and XP, not cash or redeemable goods.
@@ -70,9 +70,17 @@ Local development: `npm run dev`. If your container cannot enumerate network int
 
 `supabase/schema.sql` defines all tables, row-level security, rubric validation, invitation functions, quiz grading, and submission gates. It has already been applied to the live project; do not re-run it there.
 
-`supabase/functions/enroll/index.ts` is the deployed enrollment function. Its one-use invitation validates access before account creation; it uses the server-side Supabase service role provided by the Edge Function environment. `verify_jwt=false` is intentional because new members have no session; the invitation is the function's custom authentication mechanism.
+`supabase/functions/enroll/index.ts` is the deployed enrollment function. Its invitation validates access before account creation; it uses the server-side Supabase service role provided by the Edge Function environment. `verify_jwt=false` is intentional because new members have no session; the invitation is the function's custom authentication mechanism.
 
 The private source curriculum and answer keys are already seeded in the live database. They are intentionally excluded from this public repository. Their private source copy remains in the original owner archive.
+
+## Reusable owner invitation migration
+
+Apply `supabase/migrations/20260917000000_reusable_owner_invitation.sql` to the existing Supabase project as a database migration. Merging or deploying the Vercel frontend alone does **not** run SQL migrations. Apply the migration before considering the invitation fix live; no Edge Function redeploy is required for the behavior change.
+
+The migration identifies the original owner invitation by `role = 'owner' and created_by is null`, which was verified to match exactly one already-used invitation in the live project. It preserves its token hash and redemption history, marks it reusable, and removes its expiry. It stops if more than one bootstrap invitation exists, rather than changing multiple owner credentials. No private token or hash is committed. New ordinary invitations retain their existing expiry and single-use rules. Successful redemptions retain the latest `used_by`/`used_at`; membership creation and redemption remain atomic.
+
+Fresh installations should apply `schema.sql`, provision their private bootstrap invitation, then apply this migration. The schema alone does not make future owner invitations reusable automatically.
 
 ## Validation and limits
 
