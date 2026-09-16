@@ -32,3 +32,10 @@
 - Hash-based mission navigation verified through the live UI.
 - Formatting gate passes; a GitHub Actions workflow runs formatting, tests and production build on main pushes and PRs.
 - Public repository manifest excludes curriculum.json, quiz-keys.json, owner invitations, environment secrets and temporary test files.
+
+## Reusable owner invitation fix
+
+- Read-only production inspection confirmed exactly one bootstrap owner invitation, already redeemed and not yet expired. No token or hash was retrieved.
+- PostgreSQL regression tests run locally with PGlite and pgcrypto, executing the checked-in schema and migration. They reproduce the used-code rejection, then verify repeated owner enrollment with the same token, non-expiring access, preserved history, ordinary single-use invitations, expired/invalid rejection, transaction rollback, service-role-only RPC execution, and the multiple-bootstrap guard.
+- `npm test`: 17 passing tests including seven invitation regression cases. Formatting and production build pass.
+- The migration changes only the existing bootstrap owner invitation's reuse/expiry policy. Existing accounts continue to sign in normally; reusing an invitation does not permit duplicate account emails or reset a password.
